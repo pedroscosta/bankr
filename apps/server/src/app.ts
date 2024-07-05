@@ -3,6 +3,7 @@ import "dotenv/config";
 import Koa, { Request } from "koa";
 import { graphqlHTTP, OptionsData } from "koa-graphql";
 import mongoose from "mongoose";
+import { parseToken } from "./lib/jwt-auth";
 import { schema } from "./schema";
 
 const connectToDatabase = async () => {
@@ -30,7 +31,7 @@ const app = new Koa();
 const router = new Router();
 
 const graphqlSettings = async (req: Request): Promise<OptionsData> => {
-  // TODO: Add user to context
+  const user = await parseToken(req.headers.authorization);
 
   return {
     graphiql: {
@@ -39,14 +40,13 @@ const graphqlSettings = async (req: Request): Promise<OptionsData> => {
     },
     schema,
     pretty: true,
-    context: {},
+    context: { user },
     customFormatErrorFn: ({ message, locations, stack }) => {
       console.error("GraphQL error:", message, locations, stack);
 
       return {
         message,
         locations,
-        stack,
       };
     },
   };

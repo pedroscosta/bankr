@@ -2,12 +2,13 @@ import bcrypt from "bcryptjs";
 import mongoose, { Document, Schema } from "mongoose";
 
 export type User = {
+  _id: string;
   username: string;
   name: string;
   password: string;
 };
 
-export type UserDocumentInterface = User &
+export type UserDocument = User &
   Document & {
     hashPassword(password: string): Promise<string>;
     comparePasswords(
@@ -16,7 +17,7 @@ export type UserDocumentInterface = User &
     ): Promise<boolean>;
   };
 
-const UserSchema = new Schema<UserDocumentInterface>({
+const UserSchema = new Schema<UserDocument>({
   username: {
     type: String,
     required: true,
@@ -30,7 +31,6 @@ const UserSchema = new Schema<UserDocumentInterface>({
     type: String,
     required: true,
     minlength: [8, "Password must have at least 8 characters"],
-    select: false,
   },
 });
 
@@ -64,7 +64,4 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-export const UserModel = mongoose.model<UserDocumentInterface>(
-  "User",
-  UserSchema
-);
+export const UserModel = mongoose.model<UserDocument>("User", UserSchema);

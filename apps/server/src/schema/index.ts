@@ -1,5 +1,5 @@
 import { mergeSchemas } from "graphql-yoga";
-import { usersSchema } from "./users";
+import { usersSchema } from "./auth";
 
 export const schema = mergeSchemas({
   typeDefs: /* GraphQL */ `
