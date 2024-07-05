@@ -8,15 +8,15 @@ const DUPLICATION_ERROR_CODE = 11000;
 const registerSchema = z
   .object({
     username: z.string().min(3).max(20).trim(),
-    name: z.string().min(3).max(20).trim(),
-    password: z.string().min(8).max(20).trim(),
+    name: z.string().min(3).max(64).trim(),
+    password: z.string().min(8).trim(),
   })
   .strict();
 
 const loginSchema = z
   .object({
     username: z.string().min(3).max(20).trim(),
-    password: z.string().min(8).max(20).trim(),
+    password: z.string().min(8).trim(),
   })
   .strict();
 

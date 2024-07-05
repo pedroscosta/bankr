@@ -1,5 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import AuthGuard from "./guards/auth";
 import { LoginPage } from "./pages/login";
+import { RegisterPage } from "./pages/register";
 
 const router = createBrowserRouter([
   {
@@ -8,7 +10,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <LoginPage />,
+    element: (
+      <AuthGuard redirect="/" reverse>
+        <LoginPage />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <AuthGuard redirect="/" reverse>
+        <RegisterPage />
+      </AuthGuard>
+    ),
   },
 ]);
 
