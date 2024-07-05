@@ -1,3 +1,4 @@
+import cors from "@koa/cors";
 import Router from "@koa/router";
 import "dotenv/config";
 import Koa, { Request } from "koa";
@@ -54,6 +55,7 @@ const graphqlSettings = async (req: Request): Promise<OptionsData> => {
 
 router.all("/graphql", graphqlHTTP(graphqlSettings));
 
+app.use(cors());
 app.use(router.routes()).use(router.allowedMethods());
 
 const port = process.env.PORT || 4000;
