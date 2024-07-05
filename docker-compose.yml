@@ -1,0 +1,14 @@
+services:
+  mongo:
+    image: mongo:latest # Or a specific version tag
+    restart: unless-stopped # Restart container on failure
+    ports:
+      - "27017:27017" # Map container port to host port
+    volumes:
+      - mongodb-data:/data/db # Persist data using a named volume
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin # Optional username for root access
+      - MONGO_INITDB_ROOT_PASSWORD=password # Optional password for root access
+
+volumes:
+  mongodb-data: # Define named volume for data persistence

@@ -10,13 +10,23 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/koa": "^2.15.0",
+    "@koa/router": "^12.0.1",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "graphql": "16.6.0",
+    "graphql-yoga": "5.x.x",
     "koa": "^2.15.3",
+    "koa-graphql": "^0.12.0",
+    "mongoose": "^8.4.4",
     "tsx": "^4.16.2"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/koa": "^2.15.0",
+    "@types/koa-graphql": "^0.8.11",
+    "@types/koa__router": "^12.0.4",
     "@types/node": "^20.14.9",
     "typescript": "^5.5.3"
   }
