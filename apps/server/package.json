@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx --watch ./src/app.ts"
+    "dev": "tsx --watch ./src/app.ts",
+    "schema:build": "tsx ./scripts/generate-schema.ts"
   },
   "keywords": [],
   "author": "",
