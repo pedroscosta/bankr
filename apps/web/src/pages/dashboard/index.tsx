@@ -51,10 +51,13 @@ import { Transactions } from "@/graphql/queries/transaction-query";
 import { CurrentUser } from "@/graphql/queries/user-query";
 import { useQuery } from "@/lib/relay";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CreateTransaction } from "./create-transaction";
 
 export function DashboardPage() {
   const ITEMS_PER_PAGE = 5;
+
+  const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -108,7 +111,14 @@ export function DashboardPage() {
               <DropdownMenuSeparator />
               <DropdownMenuItem disabled>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+                  navigate("/login", { replace: true });
+                }}
+              >
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
