@@ -7,8 +7,17 @@ import {
 } from "../models/transaction";
 
 const getTransactionSchema = z.object({
-  page: z.number().min(0).optional().default(0),
-  pageSize: z.number().min(0).max(100).optional().default(10),
+  page: z
+    .number()
+    .min(0)
+    .nullish()
+    .transform((s) => s ?? 0),
+  pageSize: z
+    .number()
+    .min(0)
+    .max(100)
+    .nullish()
+    .transform((s) => s ?? 10),
 });
 
 const sendTransactionSchema = z.object({

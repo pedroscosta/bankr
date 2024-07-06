@@ -1,3 +1,4 @@
+import { getCookie } from "@/lib/utils";
 import { jwtDecode } from "jwt-decode";
 import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,9 +17,7 @@ const AuthGuard = ({ children, redirect, reverse = false }: Props) => {
   let isAuthenticated = false;
 
   try {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="));
+    const token = getCookie("token");
 
     if (token && jwtDecode<{ exp: number }>(token).exp >= Date.now() / 1000) {
       isAuthenticated = true;
@@ -27,8 +26,10 @@ const AuthGuard = ({ children, redirect, reverse = false }: Props) => {
     // Invalid token
   }
 
+  console.log(isAuthenticated);
+
   if ((!reverse && !isAuthenticated) || (reverse && isAuthenticated)) {
-    navigate(redirect);
+    navigate(redirect, { replace: true });
   }
 
   return <>{children}</>;

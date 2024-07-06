@@ -1,5 +1,5 @@
 type User {
-  id: ID!
+  id: String!
   username: String!
   name: String!
 }
@@ -16,8 +16,25 @@ type LoginResponse {
 type Mutation {
   register(username: String!, name: String!, password: String!): RegisterResponse!
   login(username: String!, password: String!): LoginResponse!
+  createTransaction(receiver: String!, amount: Int!): Transaction!
+}
+
+type Transaction {
+  id: String!
+  sender: User!
+  receiver: User
+  amount: Int!
+  createdAt: Float!
+}
+
+type PaginatedTransactions {
+  transactions: [Transaction]!
+  page: Int!
+  pageSize: Int!
+  total: Int!
 }
 
 type Query {
+  transactions(page: Int, pageSize: Int): PaginatedTransactions!
   info: String!
 }
