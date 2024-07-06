@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx --watch ./src/app.ts",
-    "schema:build": "tsx ./scripts/generate-schema.ts"
+    "start": "tsx ./src/app.ts",
+    "schema:build": "tsx ./src/scripts/generate-schema.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -25,8 +27,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/koa": "^2.15.0",

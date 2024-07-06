@@ -2,7 +2,7 @@ import { writeFile } from "fs/promises";
 
 import { printSchema } from "graphql/utilities";
 import path from "path";
-import { schema } from "../src/schema";
+import { schema } from "../schema";
 
 export async function updateSchema() {
   await writeFile(
