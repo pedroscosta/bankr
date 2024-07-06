@@ -80,10 +80,12 @@ export const authSchema = createSchema({
         const user = await UserModel.findOne({ username: args.username });
 
         if (!user) {
+          console.log("user not found");
           throw new Error("Invalid username or password");
         }
 
         if (!(await user.comparePasswords(args.password, user.password))) {
+          console.log("password not valid");
           throw new Error("Invalid username or password");
         }
 
