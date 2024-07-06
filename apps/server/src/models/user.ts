@@ -64,4 +64,16 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
+// UserSchema.virtual("transactionsSent", {
+//   ref: "Transaction",
+//   localField: "_id",
+//   foreignField: "sender",
+// });
+
+// UserSchema.virtual("transactionsReceived", {
+//   ref: "Transaction",
+//   localField: "_id",
+//   foreignField: "receiver",
+// });
+
 export const UserModel = mongoose.model<UserDocument>("User", UserSchema);

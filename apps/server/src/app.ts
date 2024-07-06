@@ -32,7 +32,7 @@ const app = new Koa();
 const router = new Router();
 
 const graphqlSettings = async (req: Request): Promise<OptionsData> => {
-  const user = await parseToken(req.headers.authorization);
+  const { user } = await parseToken(req.headers.authorization);
 
   return {
     graphiql: {

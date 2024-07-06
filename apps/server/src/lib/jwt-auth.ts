@@ -1,8 +1,9 @@
+import { YogaInitialContext } from "graphql-yoga";
 import jwt from "jsonwebtoken";
 import { UserDocument, UserModel } from "../models/user";
 
 export const sign = async (user: UserDocument) => {
-  return jwt.sign({ _id: user._id }, process.env.JWT_SECRET!, {
+  return jwt.sign({ sub: user._id }, process.env.JWT_SECRET!, {
     expiresIn: "1d",
   });
 };
@@ -11,7 +12,7 @@ export const parseToken = async (token?: string) => {
   if (!token) return { user: null };
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(token.substring(7), process.env.JWT_SECRET!);
 
     if (!decoded) return { user: null };
 
@@ -25,6 +26,14 @@ export const parseToken = async (token?: string) => {
   }
 };
 
-export const verifyUser = (ctx?: any) => {
+export type AuthenticatedContext = YogaInitialContext & {
+  user: UserDocument;
+};
+
+export const verifyUser = (
+  ctx?: YogaInitialContext & {
+    user?: UserDocument;
+  }
+) => {
   if (!ctx?.user) throw new Error("Unauthorized");
 };
