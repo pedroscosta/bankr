@@ -3,11 +3,10 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   CircleUser,
-  ClipboardCopy,
+  Copy,
   DollarSign,
   HandCoins,
   Layers,
-  Plus,
 } from "lucide-react";
 
 import { transactionQuery } from "@/__generated__/transactionQuery.graphql";
@@ -48,26 +47,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useToast } from "@/components/ui/use-toast";
 import { Transactions } from "@/graphql/queries/transaction-query";
 import { CurrentUser } from "@/graphql/queries/user-query";
 import { useQuery } from "@/lib/relay";
 import { useState } from "react";
+import { CreateTransaction } from "./create-transaction";
 
 export function DashboardPage() {
   const ITEMS_PER_PAGE = 5;
 
-  const { toast } = useToast();
-
   const [currentPage, setCurrentPage] = useState(0);
 
-  const { data: transactions, pending: pendingTransactions } =
-    useQuery<transactionQuery>(Transactions, {
-      page: currentPage,
-      pageSize: ITEMS_PER_PAGE,
-    });
+  const {
+    data: transactions,
+    pending: pendingTransactions,
+    fetch: fetchTransactions,
+  } = useQuery<transactionQuery>(Transactions, {
+    page: currentPage,
+    pageSize: ITEMS_PER_PAGE,
+  });
 
-  const { data: user, pending: pendingUser } = useQuery<userQuery>(CurrentUser);
+  const {
+    data: user,
+    pending: pendingUser,
+    fetch: fetchUser,
+  } = useQuery<userQuery>(CurrentUser);
 
   const maxPages = Math.ceil(
     (transactions?.transactions?.total ?? 0) / ITEMS_PER_PAGE
@@ -121,20 +125,24 @@ export function DashboardPage() {
                 <Layers className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {transactions?.transactions?.total ?? 0}
-                </div>
+                {pendingTransactions && <Skeleton className="h-8 w-24" />}
+                {!pendingTransactions && (
+                  <div className="text-2xl font-bold">
+                    {transactions?.transactions?.total ?? 0}
+                  </div>
+                )}
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Balance
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Balance</CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${user?.me?.balance}</div>
+                {pendingUser && <Skeleton className="h-8 w-24" />}
+                {!pendingUser && (
+                  <div className="text-2xl font-bold">${user?.me?.balance}</div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -152,7 +160,7 @@ export function DashboardPage() {
                   <div className="bg-muted h-9 px-2 rounded-md border flex flex-row items-center gap-2">
                     <p>{user?.me?.id}</p>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       className="size-6 p-0 bg-muted"
                       onClick={() => {
                         try {
@@ -162,15 +170,15 @@ export function DashboardPage() {
                         }
                       }}
                     >
-                      <ClipboardCopy className="size-4 text-muted-foreground" />
+                      <Copy className="size-4 text-muted-foreground" />
                     </Button>
                   </div>
-                  <Button asChild size="sm" className="gap-1">
-                    <a href="#">
-                      New transaction
-                      <Plus className="h-4 w-4 text-primary-foreground" />
-                    </a>
-                  </Button>
+                  <CreateTransaction
+                    fetch={() => {
+                      fetchUser();
+                      fetchTransactions();
+                    }}
+                  />
                 </div>
               </CardHeader>
               <CardContent>

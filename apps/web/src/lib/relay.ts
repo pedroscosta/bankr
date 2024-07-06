@@ -1,4 +1,3 @@
-import { GraphQLError } from "@/graphql/types";
 import { useEffect, useState } from "react";
 import {
   Environment,
@@ -11,11 +10,6 @@ import {
   Store,
 } from "relay-runtime";
 import { getCookie } from "./utils";
-
-type QueryResponse<T = any> = {
-  data: T;
-  errors?: GraphQLError[];
-};
 
 const fetchFunction: FetchFunction = async (operation, variables) => {
   const token = getCookie("token");
@@ -43,7 +37,7 @@ const environment = new Environment({
   store,
 });
 
-export default environment;
+export { environment };
 
 export const useQuery = <T extends OperationType>(
   query: GraphQLTaggedNode,

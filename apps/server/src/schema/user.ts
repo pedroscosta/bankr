@@ -27,7 +27,7 @@ export const userSchema = createSchema<AuthenticatedContext>({
       id: String!
       username: String!
       name: String!
-      balance: Float!
+      balance: Float
     }
 
     type Query {
