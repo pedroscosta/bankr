@@ -20,7 +20,7 @@ const loginSchema = z
   })
   .strict();
 
-export const usersSchema = createSchema({
+export const authSchema = createSchema({
   typeDefs: /* GraphQL */ `
     type User {
       id: String!

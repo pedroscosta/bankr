@@ -31,13 +31,14 @@ export const transactionsSchema = createSchema<AuthenticatedContext>({
       id: String!
       username: String!
       name: String!
+      balance: Float
     }
 
     type Transaction {
       id: String!
       sender: User!
       receiver: User
-      amount: Int!
+      amount: Float!
       createdAt: Float!
     }
 
@@ -53,7 +54,7 @@ export const transactionsSchema = createSchema<AuthenticatedContext>({
     }
 
     type Mutation {
-      createTransaction(receiver: String!, amount: Int!): Transaction!
+      createTransaction(receiver: String!, amount: Float!): Transaction!
     }
   `,
   resolvers: {
@@ -107,16 +108,32 @@ export const transactionsSchema = createSchema<AuthenticatedContext>({
 
         const args = sendTransactionSchema.parse(rawArgs);
 
+        if (ctx.user.balance < args.amount) {
+          throw new Error("Invalid amount");
+        }
+
         const transaction = (await new TransactionModel({
           sender: ctx.user._id,
           receiver: args.receiver,
           amount: args.amount,
           createdAt: Date.now(),
-        }).populate("receiver")) as PopulatedTransactionDocument;
+        }).populate(["receiver", "sender"])) as PopulatedTransactionDocument;
 
         if (!transaction.receiver) {
           throw new Error("Invalid receiver");
         }
+
+        await transaction.sender
+          .set({
+            balance: transaction.sender.balance - transaction.amount,
+          })
+          .save();
+
+        await transaction.receiver
+          .set({
+            balance: transaction.receiver.balance + transaction.amount,
+          })
+          .save();
 
         await transaction.save();
 
@@ -126,6 +143,7 @@ export const transactionsSchema = createSchema<AuthenticatedContext>({
             id: ctx.user._id,
             username: ctx.user.username,
             name: ctx.user.name,
+            balance: transaction.sender.balance,
           },
           receiver: {
             id: transaction.receiver._id,

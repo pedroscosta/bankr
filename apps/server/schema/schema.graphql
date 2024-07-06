@@ -2,6 +2,7 @@ type User {
   id: String!
   username: String!
   name: String!
+  balance: Float!
 }
 
 type RegisterResponse {
@@ -16,14 +17,14 @@ type LoginResponse {
 type Mutation {
   register(username: String!, name: String!, password: String!): RegisterResponse!
   login(username: String!, password: String!): LoginResponse!
-  createTransaction(receiver: String!, amount: Int!): Transaction!
+  createTransaction(receiver: String!, amount: Float!): Transaction!
 }
 
 type Transaction {
   id: String!
   sender: User!
   receiver: User
-  amount: Int!
+  amount: Float!
   createdAt: Float!
 }
 
@@ -36,5 +37,6 @@ type PaginatedTransactions {
 
 type Query {
   transactions(page: Int, pageSize: Int): PaginatedTransactions!
+  me: User!
   info: String!
 }

@@ -8,6 +8,7 @@ export const Transactions = graphql`
           id
           username
           name
+          balance
         }
         receiver {
           id

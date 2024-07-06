@@ -6,6 +6,7 @@ export type User = {
   username: string;
   name: string;
   password: string;
+  balance: number;
 };
 
 export type UserDocument = User &
@@ -31,6 +32,12 @@ const UserSchema = new Schema<UserDocument>({
     type: String,
     required: true,
     minlength: [8, "Password must have at least 8 characters"],
+  },
+  balance: {
+    type: Number,
+    required: true,
+    min: 0,
+    default: 500,
   },
 });
 

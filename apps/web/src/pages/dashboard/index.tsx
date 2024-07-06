@@ -1,7 +1,9 @@
 import { format } from "date-fns";
 import {
+  ArrowDownLeft,
   ArrowUpRight,
   CircleUser,
+  ClipboardCopy,
   DollarSign,
   HandCoins,
   Layers,
@@ -9,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { transactionQuery } from "@/__generated__/transactionQuery.graphql";
+import { userQuery } from "@/__generated__/userQuery.graphql";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,46 +50,28 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { Transactions } from "@/graphql/queries/transaction-query";
-import environment from "@/lib/relay";
-import { useEffect, useState } from "react";
-import { fetchQuery } from "relay-runtime";
+import { CurrentUser } from "@/graphql/queries/user-query";
+import { useQuery } from "@/lib/relay";
+import { useState } from "react";
 
 export function DashboardPage() {
   const ITEMS_PER_PAGE = 5;
 
   const { toast } = useToast();
 
-  const [transactions, setTransactions] = useState<
-    transactionQuery["response"]["transactions"]["transactions"]
-  >([]);
-  const [pending, setPending] = useState(true);
-  const [totalTransactions, setTotalTransactions] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
 
-  useEffect(() => {
-    fetchQuery<transactionQuery>(environment, Transactions, {
+  const { data: transactions, pending: pendingTransactions } =
+    useQuery<transactionQuery>(Transactions, {
       page: currentPage,
       pageSize: ITEMS_PER_PAGE,
-    }).subscribe({
-      start: () => {
-        setPending(true);
-      },
-      error: (error: Error) => {
-        toast({
-          title: "Oops, an error occurred",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-      next: (data) => {
-        setPending(false);
-        setTransactions(data.transactions.transactions);
-        setTotalTransactions(data.transactions.total);
-      },
     });
-  }, [currentPage]);
 
-  const maxPages = Math.ceil(totalTransactions / ITEMS_PER_PAGE);
+  const { data: user, pending: pendingUser } = useQuery<userQuery>(CurrentUser);
+
+  const maxPages = Math.ceil(
+    (transactions?.transactions?.total ?? 0) / ITEMS_PER_PAGE
+  );
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -136,7 +121,9 @@ export function DashboardPage() {
                 <Layers className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">2350</div>
+                <div className="text-2xl font-bold">
+                  {transactions?.transactions?.total ?? 0}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -147,7 +134,7 @@ export function DashboardPage() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$45,231.89</div>
+                <div className="text-2xl font-bold">${user?.me?.balance}</div>
               </CardContent>
             </Card>
           </div>
@@ -157,28 +144,47 @@ export function DashboardPage() {
                 <div className="grid gap-2">
                   <CardTitle>Transactions</CardTitle>
                   <CardDescription>
-                    Recent transactions from your store.
+                    Recent transactions of your account.
                   </CardDescription>
                 </div>
-                <Button asChild size="sm" className="ml-auto gap-1">
-                  <a href="#">
-                    New
-                    <Plus className="h-4 w-4 text-primary-foreground" />
-                  </a>
-                </Button>
+                <div className="ml-auto flex flex-row gap-4 items-center">
+                  <p>Account number:</p>
+                  <div className="bg-muted h-9 px-2 rounded-md border flex flex-row items-center gap-2">
+                    <p>{user?.me?.id}</p>
+                    <Button
+                      variant="outline"
+                      className="size-6 p-0 bg-muted"
+                      onClick={() => {
+                        try {
+                          navigator.clipboard.writeText(user?.me?.id ?? "");
+                        } catch (error: any) {
+                          console.error(error);
+                        }
+                      }}
+                    >
+                      <ClipboardCopy className="size-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                  <Button asChild size="sm" className="gap-1">
+                    <a href="#">
+                      New transaction
+                      <Plus className="h-4 w-4 text-primary-foreground" />
+                    </a>
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Type</TableHead>
-                      <TableHead>Customer</TableHead>
+                      <TableHead>Account</TableHead>
                       <TableHead className="text-right">Date</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {pending &&
+                    {pendingTransactions &&
                       [...Array(ITEMS_PER_PAGE).keys()].map((i) => (
                         <TableRow key={i}>
                           <TableCell>
@@ -195,25 +201,33 @@ export function DashboardPage() {
                           </TableCell>
                         </TableRow>
                       ))}
-                    {!pending &&
-                      transactions.map((t) => {
-                        // const otherPerson =
-                        //   t?.receiver?.id !== t?.sender?.id
-                        //     ? t?.receiver
-                        //     : t?.sender;
+                    {!pendingTransactions &&
+                      transactions?.transactions?.transactions.map((t) => {
+                        const receiving = user?.me?.id === t?.receiver?.id;
+                        const otherPerson = receiving ? t?.sender : t?.receiver;
+
                         return (
-                          <TableRow>
+                          <TableRow key={t?.id}>
                             <TableCell>
-                              <Badge className="text-xs border-green-500 size-8 flex items-center justify-center p-0">
-                                <ArrowUpRight className="size-5" />
-                              </Badge>
+                              {receiving ? (
+                                <Badge className="text-xs size-8 flex items-center justify-center p-0">
+                                  <ArrowDownLeft className="size-5" />
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  className="text-xs  size-8 flex items-center justify-center p-0"
+                                  variant={"outline"}
+                                >
+                                  <ArrowUpRight className="size-5" />
+                                </Badge>
+                              )}
                             </TableCell>
                             <TableCell>
                               <div className="font-medium">
-                                {t?.receiver?.name}
+                                {otherPerson?.name}
                               </div>
                               <div className="hidden text-sm text-muted-foreground md:inline">
-                                {t?.receiver?.id}
+                                {otherPerson?.id}
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
