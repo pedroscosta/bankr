@@ -16,6 +16,12 @@ Creating a transaction:
 
 This Turborepo includes the following packages/apps:
 
+### apps/server
+The server is a simple [Koa](https://koajs.com/) + GraphQL server that uses [GraphQL Yoga](https://the-guild.dev/graphql/yoga-server) to handle the GraphQL requests. It uses [Mongoose](https://mongoosejs.com/) to interact with the MongoDB database. The server also uses [Zod](https://zod.dev/) to validate the input data.
+
+### apps/web
+The web app is a simple [Next.js](https://nextjs.org/) app that uses [Relay](https://relay.dev/) to fetch and mutate the data from the GraphQL server. The web app also uses [Shadcn UI](https://shadcn.com/) to provide a consistent design across the app. Additionally, it uses [react-hook-form](https://react-hook-form.com/) to handle form validation.
+
 ## Running this project
 
 1. Clone the repo
@@ -32,7 +38,7 @@ This Turborepo includes the following packages/apps:
     ```bash
     pnpm relay
     ```
-6. On the root directy, run:
+6. On the root directory, run:
     ```bash
     pnpm turbo dev
     ```
