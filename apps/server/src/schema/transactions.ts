@@ -5,6 +5,7 @@ import {
   PopulatedTransactionDocument,
   TransactionModel,
 } from "../models/transaction";
+import { UserModel } from "../models/user";
 
 const getTransactionSchema = z.object({
   page: z
@@ -21,8 +22,10 @@ const getTransactionSchema = z.object({
 });
 
 const sendTransactionSchema = z.object({
-  receiver: z.string().trim(),
-  amount: z.number().min(0),
+  receiver: z.string({ required_error: "Invalid receiver" }).trim(),
+  amount: z
+    .number({ required_error: "Invalid amount" })
+    .min(0, "Invalid amount"),
 });
 
 export const transactionsSchema = createSchema<AuthenticatedContext>({
@@ -112,26 +115,28 @@ export const transactionsSchema = createSchema<AuthenticatedContext>({
           throw new Error("Invalid amount");
         }
 
-        const transaction = (await new TransactionModel({
+        const receiver = await UserModel.findById(args.receiver);
+
+        if (!receiver || receiver._id.toString() === ctx.user._id.toString()) {
+          throw new Error("Invalid receiver");
+        }
+
+        const transaction = await new TransactionModel({
           sender: ctx.user._id,
           receiver: args.receiver,
           amount: args.amount,
           createdAt: Date.now(),
-        }).populate(["receiver", "sender"])) as PopulatedTransactionDocument;
+        });
 
-        if (!transaction.receiver) {
-          throw new Error("Invalid receiver");
-        }
-
-        await transaction.sender
+        await ctx.user
           .set({
-            balance: transaction.sender.balance - transaction.amount,
+            balance: ctx.user.balance - transaction.amount,
           })
           .save();
 
-        await transaction.receiver
+        await receiver
           .set({
-            balance: transaction.receiver.balance + transaction.amount,
+            balance: receiver.balance + transaction.amount,
           })
           .save();
 
@@ -143,12 +148,12 @@ export const transactionsSchema = createSchema<AuthenticatedContext>({
             id: ctx.user._id,
             username: ctx.user.username,
             name: ctx.user.name,
-            balance: transaction.sender.balance,
+            balance: ctx.user.balance,
           },
           receiver: {
-            id: transaction.receiver._id,
-            username: transaction.receiver.username,
-            name: transaction.receiver.name,
+            id: receiver._id,
+            username: receiver.username,
+            name: receiver.name,
           },
           amount: transaction.amount,
           createdAt: transaction.createdAt,
