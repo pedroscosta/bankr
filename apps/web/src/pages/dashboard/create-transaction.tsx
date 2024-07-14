@@ -20,24 +20,46 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { SendTransaction } from "@/graphql/mutations/send-transaction";
-import { environment } from "@/lib/relay";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { commitMutation } from "react-relay";
+import { commitMutation, useRelayEnvironment } from "react-relay";
 import { z } from "zod";
 
 type CreateTransactionProps = {
   fetch: () => void;
+  maxAmount: number;
 };
 
-const formSchema = z.object({
-  account: z.string({ message: "Account is required" }).trim(),
-  amount: z.number().min(0),
-});
+export const CreateTransaction = ({
+  fetch,
+  maxAmount,
+}: CreateTransactionProps) => {
+  const environment = useRelayEnvironment();
 
-export const CreateTransaction = ({ fetch }: CreateTransactionProps) => {
+  const formSchema = z.object({
+    account: z
+      .string({ message: "Account is required" })
+      .min(1, { message: "Account is required" })
+      .trim(),
+    amount: z.coerce
+      .number()
+      .gt(0, { message: "Amount must be greater than 0" })
+      .max(maxAmount, {
+        message: "Amount must be less than or equal to $" + maxAmount,
+      })
+      .refine(
+        (n) => {
+          return (
+            n.toString().split(".")[1] === undefined ||
+            n.toString().split(".")[1]?.length <= 2
+          );
+        },
+        { message: "Max precision is 2 decimal places" }
+      ),
+  });
+
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -46,11 +68,13 @@ export const CreateTransaction = ({ fetch }: CreateTransactionProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       account: "",
-      amount: undefined,
+      amount: 0,
     },
+    mode: "onSubmit",
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("onSubmit", values);
     setPending(true);
 
     commitMutation<sendTransactionMutation>(environment, {
@@ -60,11 +84,13 @@ export const CreateTransaction = ({ fetch }: CreateTransactionProps) => {
         amount: values.amount,
       },
       onCompleted: () => {
+        console.log("onCompleted");
         setPending(false);
         setOpen(false);
         fetch();
       },
       onError: (err: Error) => {
+        console.log("onError", err);
         setPending(false);
         toast({
           title: "Oops, something went wrong",
@@ -117,10 +143,11 @@ export const CreateTransaction = ({ fetch }: CreateTransactionProps) => {
                     <FormControl>
                       <Input
                         type="number"
+                        placeholder="0"
                         {...field}
-                        onChange={(event) =>
-                          field.onChange(+event.target.value)
-                        }
+                        // onChange={(event) =>
+                        //   field.onChange(+event.target.value)
+                        // }
                       />
                     </FormControl>
                     <FormMessage />
