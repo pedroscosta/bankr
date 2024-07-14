@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/table";
 import { Transactions } from "@/graphql/queries/transaction-query";
 import { CurrentUser } from "@/graphql/queries/user-query";
-import { useQuery } from "@/lib/relay";
+import { useQuery } from "@/relay/useQuery";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CreateTransaction } from "./create-transaction";
@@ -137,7 +137,10 @@ export function DashboardPage() {
               <CardContent>
                 {pendingTransactions && <Skeleton className="h-8 w-24" />}
                 {!pendingTransactions && (
-                  <div className="text-2xl font-bold">
+                  <div
+                    className="text-2xl font-bold"
+                    data-testid="transactions-count"
+                  >
                     {transactions?.transactions?.total ?? 0}
                   </div>
                 )}
@@ -151,7 +154,9 @@ export function DashboardPage() {
               <CardContent>
                 {pendingUser && <Skeleton className="h-8 w-24" />}
                 {!pendingUser && (
-                  <div className="text-2xl font-bold">${user?.me?.balance}</div>
+                  <div className="text-2xl font-bold" data-testid="balance">
+                    ${user?.me?.balance}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -188,6 +193,7 @@ export function DashboardPage() {
                       fetchUser();
                       fetchTransactions();
                     }}
+                    maxAmount={user?.me?.balance ?? 0}
                   />
                 </div>
               </CardHeader>
@@ -241,17 +247,26 @@ export function DashboardPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              <div className="font-medium">
+                              <div
+                                className="font-medium"
+                                data-testid="transaction-person-name"
+                              >
                                 {otherPerson?.name}
                               </div>
-                              <div className="hidden text-sm text-muted-foreground md:inline">
+                              <div
+                                className="hidden text-sm text-muted-foreground md:inline"
+                                data-testid="transaction-person-id"
+                              >
                                 {otherPerson?.id}
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
                               {format(t?.createdAt ?? 0, "dd/MM/yyyy HH:mm:ss")}
                             </TableCell>
-                            <TableCell className="text-right">{`${(t?.amount ?? 0) < 0 ? "-" : ""}$${t?.amount ?? 0}`}</TableCell>
+                            <TableCell
+                              className="text-right"
+                              data-testid="transaction-amount"
+                            >{`${(t?.amount ?? 0) < 0 ? "-" : ""}$${t?.amount ?? 0}`}</TableCell>
                           </TableRow>
                         );
                       })}
