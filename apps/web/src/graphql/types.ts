@@ -1,14 +1,8 @@
-export type GraphQLError = {
-  message: string;
-  locations: {
-    line: number;
-    column: number;
-  }[];
-};
+import { PayloadError } from "relay-runtime";
 
-export type MutationError<T = any> = Error & {
+export type GraphQLError<T = any> = Error & {
   source?: {
-    errors: GraphQLError[];
+    errors: PayloadError[];
     variables: T;
   };
 };

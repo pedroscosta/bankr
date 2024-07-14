@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { SendTransaction } from "@/graphql/mutations/send-transaction";
+import { GraphQLError } from "@/graphql/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -74,7 +75,6 @@ export const CreateTransaction = ({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("onSubmit", values);
     setPending(true);
 
     commitMutation<sendTransactionMutation>(environment, {
@@ -84,17 +84,16 @@ export const CreateTransaction = ({
         amount: values.amount,
       },
       onCompleted: () => {
-        console.log("onCompleted");
         setPending(false);
         setOpen(false);
         fetch();
       },
-      onError: (err: Error) => {
-        console.log("onError", err);
+      onError: (err: GraphQLError) => {
         setPending(false);
         toast({
           title: "Oops, something went wrong",
-          description: err.message,
+          description:
+            err.source?.errors[0].message || "An unknown error occurred",
           variant: "destructive",
         });
       },

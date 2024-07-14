@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/table";
 import { Transactions } from "@/graphql/queries/transaction-query";
 import { CurrentUser } from "@/graphql/queries/user-query";
+import { logout } from "@/lib/utils";
 import { useQuery } from "@/relay/useQuery";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -113,8 +114,7 @@ export function DashboardPage() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
-                  navigate("/login", { replace: true });
+                  logout(navigate);
                 }}
               >
                 Logout

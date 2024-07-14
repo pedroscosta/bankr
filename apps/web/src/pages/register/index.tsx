@@ -24,7 +24,7 @@ import { z } from "zod";
 import { registerMutation } from "@/__generated__/registerMutation.graphql";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Register } from "@/graphql/mutations/register-mutation";
-import { MutationError } from "@/graphql/types";
+import { GraphQLError } from "@/graphql/types";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useMutation } from "react-relay";
@@ -91,7 +91,7 @@ export function RegisterPage() {
 
         navigate("/login", { replace: true });
       },
-      onError: (err: MutationError) => {
+      onError: (err: GraphQLError) => {
         setPending(false);
         setError(err.source?.errors[0].message || "An unknown error occurred");
       },

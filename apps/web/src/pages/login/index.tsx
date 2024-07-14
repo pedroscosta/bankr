@@ -24,7 +24,7 @@ import { z } from "zod";
 import { loginMutation } from "@/__generated__/loginMutation.graphql";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Login } from "@/graphql/mutations/login-mutation";
-import { MutationError } from "@/graphql/types";
+import { GraphQLError } from "@/graphql/types";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useMutation } from "react-relay";
@@ -74,7 +74,7 @@ export function LoginPage() {
         localStorage.setItem("CURRENT_USER", JSON.stringify(res.login.user));
         navigate("/", { replace: true });
       },
-      onError: (err: MutationError) => {
+      onError: (err: GraphQLError) => {
         setPending(false);
         setError(err.source?.errors[0].message || "An unknown error occurred");
       },

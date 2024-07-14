@@ -24,8 +24,6 @@ const AuthGuard = ({ children, redirect, reverse = false }: Props) => {
     // Invalid token
   }
 
-  console.log(isAuthenticated);
-
   if ((!reverse && !isAuthenticated) || (reverse && isAuthenticated)) {
     return <Navigate to={redirect} />;
   }
