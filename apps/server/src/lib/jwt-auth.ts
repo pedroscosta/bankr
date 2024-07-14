@@ -1,5 +1,6 @@
 import { YogaInitialContext } from "graphql-yoga";
 import jwt from "jsonwebtoken";
+import { KnownError } from "../errors/known-error";
 import { UserDocument, UserModel } from "../models/user";
 
 export const sign = async (user: UserDocument) => {
@@ -35,5 +36,5 @@ export const verifyUser = (
     user?: UserDocument;
   }
 ) => {
-  if (!ctx?.user) throw new Error("Unauthorized");
+  if (!ctx?.user) throw new KnownError("Unauthorized", "UNAUTHORIZED");
 };

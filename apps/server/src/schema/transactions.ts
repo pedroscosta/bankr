@@ -1,5 +1,6 @@
 import { createSchema } from "graphql-yoga";
 import { z } from "zod";
+import { KnownError } from "../errors/known-error";
 import { AuthenticatedContext, verifyUser } from "../lib/jwt-auth";
 import {
   PopulatedTransactionDocument,
@@ -112,13 +113,18 @@ export const transactionsSchema = createSchema<AuthenticatedContext>({
         const args = sendTransactionSchema.parse(rawArgs);
 
         if (ctx.user.balance < args.amount) {
-          throw new Error("Invalid amount");
+          throw new KnownError("Invalid amount", "BAD_REQUEST");
+        }
+        let receiver;
+
+        try {
+          receiver = await UserModel.findById(args.receiver);
+        } catch (err) {
+          throw new KnownError("Invalid receiver", "BAD_REQUEST");
         }
 
-        const receiver = await UserModel.findById(args.receiver);
-
         if (!receiver || receiver._id.toString() === ctx.user._id.toString()) {
-          throw new Error("Invalid receiver");
+          throw new KnownError("Invalid receiver", "BAD_REQUEST");
         }
 
         const transaction = await new TransactionModel({

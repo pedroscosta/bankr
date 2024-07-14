@@ -1,9 +1,11 @@
 import cors from "@koa/cors";
 import Router from "@koa/router";
 import "dotenv/config";
+import { GraphQLError } from "graphql";
 import Koa, { Request } from "koa";
 import { graphqlHTTP, OptionsData } from "koa-graphql";
 import mongoose from "mongoose";
+import { KnownError } from "./errors/known-error";
 import { parseToken } from "./lib/jwt-auth";
 import { schema } from "./schema";
 
@@ -42,12 +44,22 @@ const graphqlSettings = async (req: Request): Promise<OptionsData> => {
     schema,
     pretty: true,
     context: { user },
-    customFormatErrorFn: ({ message, locations, stack }) => {
-      console.error("GraphQL error:", message, locations, stack);
+    customFormatErrorFn: (err: GraphQLError) => {
+      const { message, locations, stack, originalError } = err;
+
+      if (!(originalError instanceof KnownError)) {
+        console.error("Unknown error:", message, locations, stack);
+      }
 
       return {
         message,
         locations,
+        extensions: {
+          code:
+            originalError instanceof KnownError
+              ? (originalError as KnownError).code
+              : undefined,
+        },
       };
     },
   };
